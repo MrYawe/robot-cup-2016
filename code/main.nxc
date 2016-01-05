@@ -1,0 +1,56 @@
+/**
+ *	AC : right left motors
+ * 	B : collector motor
+ */
+
+// Sensors
+#define ULTRASONIC IN_4
+#define S_COLLISION SENSOR_1
+
+// Constants
+#define NEAR 30 //cm
+
+// Global variables
+mutex moveMutex;
+
+task move_auto()
+{
+	while (true)
+	{
+		SetSensorLowspeed(ULTRASONIC);
+		while(true) {
+			OnFwd(OUT_AC,50);
+			while(SensorUS(ULTRASONIC)>NEAR); // ultrasonic detection
+			Off(OUT_AC);
+			OnRev(OUT_C,100);
+			Wait(800);
+		}
+	}
+}
+
+task run_collector()
+{
+	while (true)
+	{
+		OnRev(OUT_B, 75);
+	}
+}
+
+task check_collision()
+{
+	while (true)
+	{
+		if (S_COLLISION == 1)
+		{
+			Acquire(moveMutex);
+			OnRev(OUT_AC, 75); Wait(500);
+			OnFwd(OUT_A, 75); Wait(500);
+			Release(moveMutex);
+		}
+	}
+}
+
+task main()
+{
+	Precedes(move_auto, run_collector, check_collision);
+}
