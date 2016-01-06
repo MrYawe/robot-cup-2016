@@ -1,0 +1,10 @@
+#define THRESHOLD 40
+task main()
+{
+	SetSensorLight(IN_3);
+	while (true)
+	{
+		int value = Sensor(IN_3);
+		NumOut(1, 3, value);
+	}
+}

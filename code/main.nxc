@@ -1,30 +1,36 @@
 /**
  *	AC : right left motors
  * 	B : collector motor
+ *  sudo nbc main.nxc -O=main.rxe
+ * 	sudo t2n -put main.rxe
  */
 
 // Sensors
-#define ULTRASONIC IN_4
+#define S_ULTRASONIC IN_4
+#define S_COLOR IN_3
 #define S_COLLISION SENSOR_1
 
 // Constants
 #define NEAR 30 //cm
+#define SPEED 80
+#define MIN_BORDERLINE_COLOR 53
+#define VOLUME 3
 
 // Global variables
 mutex moveMutex;
 
 task move_auto()
 {
-	while (true)
+	SetSensorLowspeed(S_ULTRASONIC);
+	while(true) 
 	{
-		SetSensorLowspeed(ULTRASONIC);
-		while(true) {
-			OnFwd(OUT_AC,50);
-			while(SensorUS(ULTRASONIC)>NEAR); // ultrasonic detection
-			Off(OUT_AC);
-			OnRev(OUT_C,100);
-			Wait(800);
-		}
+		OnRev(OUT_AC, SPEED);
+		while(SensorUS(S_ULTRASONIC)>NEAR); // ultrasonic detection
+		Off(OUT_AC);
+		PlayToneEx(262,1600,VOL,FALSE); Wait(500);
+		OnRev(OUT_C,100); //old
+		OnFwd(OUT_A,100);
+		Wait(750);
 	}
 }
 
@@ -43,8 +49,29 @@ task check_collision()
 		if (S_COLLISION == 1)
 		{
 			Acquire(moveMutex);
-			OnRev(OUT_AC, 75); Wait(500);
-			OnFwd(OUT_A, 75); Wait(500);
+			OnFwd(OUT_AC, 75); Wait(500);
+			OnRev(OUT_A, 75); Wait(500);
+			Release(moveMutex);
+		}
+	}
+}
+
+task check_boderline()
+{
+	SetSensorLight(S_COLOR);
+	while (true)
+	{
+		if(Sensor(S_COLOR) >= MIN_BORDERLINE_COLOR)
+		{
+			Acquire(moveMutex);
+			PlayToneEx(262,1600,VOL,FALSE); Wait(500);
+			OnFwd(OUT_AC, 75); // marche arriere 
+			Wait(500);
+			OnFwd(OUT_A,100); // pivot
+			OnRev(OUT_C,100); 
+			Wait(500);
+			Off(OUT_AC);
+			OnRev(OUT_AC, SPEED);
 			Release(moveMutex);
 		}
 	}
@@ -52,5 +79,5 @@ task check_collision()
 
 task main()
 {
-	Precedes(move_auto, run_collector, check_collision);
+	Precedes(move_auto, run_collector, check_collision, check_boderline);
 }
