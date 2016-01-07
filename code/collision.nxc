@@ -1,0 +1,15 @@
+task main()
+{
+ SetSensorTouch(IN_1);
+ SetSensorTouch(IN_2);
+ OnRev(OUT_AC, 100);
+ while (true)
+ {
+ if (SENSOR_1 == 1 || SENSOR_2 == 1)
+ {
+ OnFwd(OUT_AC, 75); Wait(800);
+ OnRev(OUT_A, 75); Wait(800);
+ OnRev(OUT_AC, 100);
+ }
+ }
+}

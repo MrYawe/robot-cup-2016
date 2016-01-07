@@ -15,7 +15,7 @@
 #define NEAR 30 //cm
 #define SPEED 100
 #define MIN_BORDERLINE_COLOR 45
-#define VOLUME 4
+#define VOLUME 3
 
 // Global variables
 mutex moveMutex;
@@ -29,7 +29,7 @@ task move_auto()
 			OnRev(OUT_AC, SPEED);
 			while(SensorUS(S_ULTRASONIC)>NEAR); // ultrasonic detection
 			Off(OUT_AC);
-			PlayToneEx(1000,400,VOLUME,FALSE);
+			PlayToneEx(262,1600,VOLUME,FALSE);
 			OnRev(OUT_C,100); //old
 			OnFwd(OUT_A,100);
 			Wait(950);
@@ -54,7 +54,7 @@ task check_collision()
 		if (SENSOR_1 == 1 || SENSOR_2 == 1)
 		{
 			Acquire(moveMutex);
-				PlayToneEx(1500,400,VOLUME,FALSE);
+				PlayToneEx(262,1600,VOLUME,FALSE);
 				OnFwd(OUT_AC, 75); // marche arriere 
 				Wait(950);
 				OnFwd(OUT_A,100); // pivot
@@ -75,7 +75,7 @@ task check_boderline()
 		if(Sensor(S_COLOR) >= MIN_BORDERLINE_COLOR)
 		{
 			Acquire(moveMutex);
-				PlayToneEx(2000,400,VOLUME,FALSE);
+				PlayToneEx(262,1600,VOLUME,FALSE);
 				OnFwd(OUT_AC, 75); // marche arriere 
 				Wait(950);
 				OnFwd(OUT_A,100); // pivot
@@ -87,6 +87,7 @@ task check_boderline()
 		}
 	}
 }
+
 
 task main()
 {
